@@ -1,0 +1,114 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(AppetiteTrackerApp());
+}
+
+class AppetiteTrackerApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Appetite tracker',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: AppetiteTrackerHome(),
+    );
+  }
+}
+
+class AppetiteTrackerHome extends StatefulWidget {
+  @override
+  _AppetiteTrackerHomeState createState() => _AppetiteTrackerHomeState();
+}
+
+class _AppetiteTrackerHomeState extends State<AppetiteTrackerHome> {
+  final List<Map<String, dynamic>> _items = [];
+  final TextEditingController _controller = TextEditingController();
+  int _appetiteRating = 0;
+
+  void _addItem() {
+    if (_controller.text.isNotEmpty) {
+      setState(() {
+        _items.add({
+          'name': _controller.text,
+          'rating': _appetiteRating,
+        });
+        _controller.clear();
+        _appetiteRating = 0;
+      });
+    }
+  }
+
+  void _showAddItemDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Add product'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _controller,
+                decoration: InputDecoration(labelText: 'Product name'),
+              ),
+              DropdownButton<int>(
+                value: _appetiteRating,
+                items: List.generate(6, (index) {
+                  return DropdownMenuItem(
+                    child: Text('$index'),
+                    value: index,
+                  );
+                }),
+                onChanged: (value) {
+                  setState(() {
+                    _appetiteRating = value!;
+                  });
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _addItem();
+                Navigator.of(context).pop();
+              },
+              child: Text('Add'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Appetite tracker'),
+      ),
+      body: ListView.builder(
+        itemCount: _items.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(_items[index]['name']),
+            subtitle: Text('Grade: ${_items[index]['rating']}'),
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddItemDialog,
+        tooltip: 'Add product',
+        child: Icon(Icons.add),
+      ),
+    );
+  }
+}
